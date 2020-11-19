@@ -1,56 +1,55 @@
 package com.natureofcode;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 
 public class Mover {
 
-    Vector2D position, velocity, acceleration;
+    private Vector2D position, velocity, acceleration;
+    private float size;
 
-    public Mover(Vector2D initPos) {
+    public Mover(float size, Vector2D initPos) {
         this.position = initPos;
         this.velocity = new Vector2D(0, 0);
         this.acceleration = new Vector2D(0, 0);
+        this.size = size;
     }
 
-    public Mover(Vector2D initPos, Vector2D initVel) {
+    public Mover(float size, Vector2D initPos, Vector2D initVel) {
         this.position = initPos;
         this.velocity = initVel;
         this.acceleration = new Vector2D(0, 0);
+        this.size = size;
     }
 
-    public Mover(Vector2D initPos, Vector2D initVel, Vector2D initAccel) {
+    public Mover(float size, Vector2D initPos, Vector2D initVel, Vector2D initAccel) {
         this.position = initPos;
         this.velocity = initVel;
         this.acceleration = initAccel;
+        this.size = size;
     }
 
-    public void update(float deltaTime) {
+    public void update(float deltaTime, Camera camera) {
         Vector2D deltaVelocity = acceleration.getCopy();
-        deltaVelocity.mult(deltaTime);
+        deltaVelocity.mult(deltaTime / size);
         velocity.add(deltaVelocity);
 
         Vector2D deltaPosition = velocity.getCopy();
         deltaPosition.mult(deltaTime);
         position.add(deltaPosition);
 
-        this.checkBounds();
+        this.checkBounds(camera);
     }
 
-    private void checkBounds() {
-        float width = Gdx.graphics.getWidth();
-        float height = Gdx.graphics.getHeight();
+    private void checkBounds(Camera camera) {
+        float width = camera.viewportWidth;
+        float height = camera.viewportHeight;
 
-        if (position.getX() < 0) {
-            position.setX(width + position.getX());
+        if (position.getX() < -1f * width / 2f || position.getX() > width / 2f) {
+            velocity = new Vector2D(-1f * velocity.getX(), velocity.getY());
         }
-        if (position.getX() > width) {
-            position.setX(position.getX() - width);
-        }
-        if (position.getY() < 0) {
-            position.setY(height + position.getY());
-        }
-        if (position.getY() > height) {
-            position.setY(position.getY() - height);
+        if (position.getY() < -1f * height / 2f || position.getY() > height / 2f) {
+            velocity = new Vector2D(velocity.getX(), -1f * velocity.getY());
         }
     }
 
@@ -76,5 +75,9 @@ public class Mover {
 
     public void setAcceleration(Vector2D acceleration) {
         this.acceleration = acceleration;
+    }
+
+    public float getSize() {
+        return size;
     }
 }

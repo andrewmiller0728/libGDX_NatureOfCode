@@ -12,12 +12,19 @@ public class Vector2D {
         this.y = y;
     }
 
-    // TODO: I suspect this doesn't work...
     public static Vector2D getRandomVector() {
         Random random = new Random();
         float randX = (random.nextFloat() * Float.MAX_VALUE) - (Float.MAX_VALUE / 2);
         float randY = (random.nextFloat() * Float.MAX_VALUE) - (Float.MAX_VALUE / 2);
         return new Vector2D(randX, randY);
+    }
+
+    public static Vector2D add(Vector2D a, Vector2D b) {
+        return new Vector2D(a.getX() + b.getX(),  a.getY() + b.getY());
+    }
+
+    public static Vector2D sub(Vector2D a, Vector2D b) {
+        return new Vector2D(a.getX() - b.getX(),  a.getY() - b.getY());
     }
 
     public void add(Vector2D that) {
