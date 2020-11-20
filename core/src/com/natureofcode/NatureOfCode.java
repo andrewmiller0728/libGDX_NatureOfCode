@@ -63,14 +63,7 @@ public class NatureOfCode extends ApplicationAdapter {
 			Vector2 dir = mousePosition.sub(chaser.getPosition()).nor().scl(accelForce);
 			chaser.setAcceleration(dir);
 			chaser.update(Gdx.graphics.getDeltaTime(), camera);
-			shapeRenderer.setColor(0.7f, 0.7f, 0.8f, 1f);
-			shapeRenderer.circle(chaser.getPosition().x,
-					chaser.getPosition().y,
-					chaser.getSize());
-			shapeRenderer.setColor(0.4f, 0.8f, 0.6f, 1f);
-			shapeRenderer.circle(chaser.getPosition().x,
-					chaser.getPosition().y,
-					chaser.getSize() * 0.9f);
+			drawMover(shapeRenderer, chaser);
 		}
 		shapeRenderer.end();
 	}
@@ -78,5 +71,16 @@ public class NatureOfCode extends ApplicationAdapter {
 	@Override
 	public void dispose () {
 		shapeRenderer.dispose();
+	}
+
+	private void drawMover(ShapeRenderer shapeRenderer, Mover mover) {
+		shapeRenderer.setColor(0.7f, 0.7f, 0.8f, 1f);
+		shapeRenderer.circle(mover.getPosition().x,
+				mover.getPosition().y,
+				mover.getSize());
+		shapeRenderer.setColor(0.4f, 0.8f, 0.6f, 1f);
+		shapeRenderer.circle(mover.getPosition().x,
+				mover.getPosition().y,
+				mover.getSize() * 0.9f);
 	}
 }
