@@ -11,8 +11,8 @@ public class Mover {
 
     public Mover(float size, Vector2 initPos) {
         this.position = initPos;
-        this.velocity = Vector2.Zero.cpy();
-        this.acceleration = Vector2.Zero.cpy();
+        this.velocity = new Vector2();
+        this.acceleration = new Vector2();
         this.size = size;
         this.mass = size / 2;
     }
@@ -20,7 +20,7 @@ public class Mover {
     public Mover(float size, Vector2 initPos, Vector2 initVel) {
         this.position = initPos;
         this.velocity = initVel;
-        this.acceleration = Vector2.Zero.cpy();
+        this.acceleration = new Vector2();
         this.size = size;
     }
 
@@ -50,11 +50,22 @@ public class Mover {
         float width = camera.viewportWidth;
         float height = camera.viewportHeight;
 
-        if (position.x < -1f * width / 2f || position.x > width / 2f) {
+        if (position.x - size < -1f * width / 2f) {
             velocity.scl(-1f, 1);
+            position.x = -1f * width / 2f + size;
         }
-        if (position.y < -1f * height / 2f || position.y > height / 2f) {
+        else if (position.x + size > width / 2f) {
+            velocity.scl(-1f, 1);
+            position.x = width / 2f - size;
+        }
+
+        if (position.y - size < -1f * height / 2f) {
             velocity.scl(1, -1);
+            position.y = -1f * height / 2f + size;
+        }
+        else if (position.y + size > height / 2f) {
+            velocity.scl(1, -1);
+            position.y = height / 2f - size;
         }
     }
 

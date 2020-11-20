@@ -17,8 +17,8 @@ public class NatureOfCode extends ApplicationAdapter {
 	private float aspectRatio, viewWidth, viewHeight;
 	private OrthographicCamera camera;
 	private ShapeRenderer shapeRenderer;
-	private ArrayList<Mover> chasers;
-	private float accelForce;
+	private ArrayList<Mover> balls;
+	private Vector2 gravity;
 	
 	@Override
 	public void create () {
@@ -30,15 +30,16 @@ public class NatureOfCode extends ApplicationAdapter {
 		camera = new OrthographicCamera(viewWidth, viewHeight);
 		shapeRenderer = new ShapeRenderer();
 
-		chasers = new ArrayList<>();
+		balls = new ArrayList<>();
 		Random rand = new Random();
 		for (int i = 0; i < 20; i++) {
-			float initSize = (rand.nextFloat() * 40) + 20;
+			float initSize = (rand.nextFloat() * 40f) + 20f;
 			Vector2 initPos = new Vector2((rand.nextFloat() * camera.viewportWidth) - camera.viewportWidth / 2f,
 					(rand.nextFloat() * camera.viewportHeight) - camera.viewportHeight / 2f);
-			chasers.add(new Mover(initSize, initPos));
+			balls.add(new Mover(initSize, initPos, new Vector2(MathUtils.random(500f) - 250f, 0)));
 		}
-		accelForce = 1000f;
+
+		gravity = new Vector2(0f, -10f);
 	}
 
 	@Override
@@ -48,22 +49,10 @@ public class NatureOfCode extends ApplicationAdapter {
 
 		shapeRenderer.setProjectionMatrix(camera.combined);
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-		for (Mover chaser : chasers) {
-			float mouseX = MathUtils.map(0,
-					windowWidth,
-					-1 * camera.viewportWidth / 2f,
-					camera.viewportWidth / 2f,
-					Gdx.input.getX());
-			float mouseY = MathUtils.map(0,
-					windowHeight,
-					camera.viewportHeight / 2f,
-					-1f * camera.viewportHeight / 2f,
-					Gdx.input.getY());
-			Vector2 mousePosition = new Vector2(mouseX, mouseY);
-			Vector2 dir = mousePosition.sub(chaser.getPosition()).nor().scl(accelForce);
-			chaser.setAcceleration(dir);
-			chaser.update(Gdx.graphics.getDeltaTime(), camera);
-			drawMover(shapeRenderer, chaser);
+		for (Mover ball : balls) {
+			ball.applyForce(gravity);
+			ball.update(Gdx.graphics.getDeltaTime(), camera);
+			drawMover(shapeRenderer, ball);
 		}
 		shapeRenderer.end();
 	}
@@ -82,5 +71,19 @@ public class NatureOfCode extends ApplicationAdapter {
 		shapeRenderer.circle(mover.getPosition().x,
 				mover.getPosition().y,
 				mover.getSize() * 0.9f);
+	}
+
+	private Vector2 getMouseVector() {
+		float mouseX = MathUtils.map(0,
+				windowWidth,
+				-1 * camera.viewportWidth / 2f,
+				camera.viewportWidth / 2f,
+				Gdx.input.getX());
+		float mouseY = MathUtils.map(0,
+				windowHeight,
+				camera.viewportHeight / 2f,
+				-1f * camera.viewportHeight / 2f,
+				Gdx.input.getY());
+		return new Vector2(mouseX, mouseY);
 	}
 }

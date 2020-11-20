@@ -17,7 +17,7 @@ public class Walker extends Mover {
         this.stepSize = stepSize;
         this.factor = factor;
 
-        Vector2 initVel = Vector2.Zero.cpy();
+        Vector2 initVel = new Vector2();
 
         r = 1f;
         g = 1f;
