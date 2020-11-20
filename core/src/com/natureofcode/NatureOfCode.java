@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -21,18 +23,18 @@ public class NatureOfCode extends ApplicationAdapter {
 	public void create () {
 		width = Gdx.graphics.getWidth();
 		height = Gdx.graphics.getHeight();
-		camera = new OrthographicCamera(1920, 1080);
+		camera = new OrthographicCamera(1200, 800);
 		shapeRenderer = new ShapeRenderer();
 
 		chasers = new ArrayList<>();
 		Random rand = new Random();
 		for (int i = 0; i < 20; i++) {
-			float initSize = (rand.nextFloat() * 30) + 10;
-			Vector2D initPos = new Vector2D((rand.nextFloat() * camera.viewportWidth) - camera.viewportWidth / 2f,
+			float initSize = (rand.nextFloat() * 40) + 10;
+			Vector2 initPos = new Vector2((rand.nextFloat() * camera.viewportWidth) - camera.viewportWidth / 2f,
 					(rand.nextFloat() * camera.viewportHeight) - camera.viewportHeight / 2f);
 			chasers.add(new Mover(initSize, initPos));
 		}
-		accelForce = 10000f;
+		accelForce = 1000f;
 	}
 
 	@Override
@@ -43,17 +45,28 @@ public class NatureOfCode extends ApplicationAdapter {
 		shapeRenderer.setProjectionMatrix(camera.combined);
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 		for (Mover chaser : chasers) {
-			Vector2D mousePosition = new Vector2D(Gdx.input.getX() - camera.viewportWidth / 2f,
-					camera.viewportHeight / 2f - Gdx.input.getY());
-			Vector2D dir = Vector2D.sub(mousePosition, chaser.getPosition());
-			dir.normalize();
-			dir.mult(accelForce);
+			float mouseX = MathUtils.map(0,
+					width,
+					-1 * camera.viewportWidth / 2f,
+					camera.viewportWidth / 2f,
+					Gdx.input.getX());
+			float mouseY = MathUtils.map(0,
+					height,
+					camera.viewportHeight / 2f,
+					-1f * camera.viewportHeight / 2f,
+					Gdx.input.getY());
+			Vector2 mousePosition = new Vector2(mouseX, mouseY);
+			Vector2 dir = mousePosition.sub(chaser.getPosition()).nor().scl(accelForce);
 			chaser.setAcceleration(dir);
 			chaser.update(Gdx.graphics.getDeltaTime(), camera);
-			shapeRenderer.setColor(0f, 0f, 0f, 1f);
-			shapeRenderer.circle(chaser.getPosition().getX(), chaser.getPosition().getY(), chaser.getSize());
-			shapeRenderer.setColor(0.8f, 0.8f, 0.8f, 1f);
-			shapeRenderer.circle(chaser.getPosition().getX(), chaser.getPosition().getY(), chaser.getSize() - 2);
+			shapeRenderer.setColor(0.5f, 0.8f, 0.5f, 1f);
+			shapeRenderer.circle(chaser.getPosition().x,
+					chaser.getPosition().y,
+					chaser.getSize());
+			shapeRenderer.setColor(0.1f, 0.1f, 0.8f, 1f);
+			shapeRenderer.circle(chaser.getPosition().x,
+					chaser.getPosition().y,
+					chaser.getSize() * 0.9f);
 		}
 		shapeRenderer.end();
 	}

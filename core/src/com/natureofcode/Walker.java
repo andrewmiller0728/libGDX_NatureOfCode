@@ -1,6 +1,8 @@
 package com.natureofcode;
 
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector2;
 
 import java.util.Random;
 
@@ -10,15 +12,12 @@ public class Walker extends Mover {
     private float factor;
     private float r, g, b, a;
 
-    public Walker(float size, Vector2D initPos, float stepSize, float factor) {
+    public Walker(float size, Vector2 initPos, float stepSize, float factor) {
         super(size, initPos);
         this.stepSize = stepSize;
         this.factor = factor;
 
-        Vector2D initVel = Vector2D.getRandomVector();
-        initVel.normalize();
-        initVel.mult(this.stepSize);
-        super.setVelocity(initVel);
+        Vector2 initVel = Vector2.Zero;
 
         r = 1f;
         g = 1f;
@@ -27,7 +26,7 @@ public class Walker extends Mover {
     }
 
     @Override
-    public void update(float deltaTime, Camera camera) {
+    public void update(float deltaTime, OrthographicCamera camera) {
         super.update(deltaTime, camera);
         changePath();
         walkColors();
@@ -36,9 +35,7 @@ public class Walker extends Mover {
     private void changePath() {
         Random random = new Random();
         float deltaTheta = (float) ((random.nextDouble() * (Math.PI / 2f)) - Math.PI / 4f);
-        super.getVelocity().normalize();
-        super.getVelocity().rotate(deltaTheta);
-        super.getVelocity().mult(stepSize);
+        super.getVelocity().nor().rotateRad(deltaTheta).scl(stepSize);
     }
 
     private void walkColors() {
