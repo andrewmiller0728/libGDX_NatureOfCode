@@ -1,24 +1,26 @@
 package com.natureofcode;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 public class Mover {
 
     private Vector2 position, velocity, acceleration;
-    private float size;
+    private float size, mass;
 
     public Mover(float size, Vector2 initPos) {
         this.position = initPos;
-        this.velocity = new Vector2(0, 0);
-        this.acceleration = new Vector2(0, 0);
+        this.velocity = Vector2.Zero.cpy();
+        this.acceleration = Vector2.Zero.cpy();
         this.size = size;
+        this.mass = size / 2;
     }
 
     public Mover(float size, Vector2 initPos, Vector2 initVel) {
         this.position = initPos;
         this.velocity = initVel;
-        this.acceleration = new Vector2(0, 0);
+        this.acceleration = Vector2.Zero.cpy();
         this.size = size;
     }
 
@@ -30,28 +32,53 @@ public class Mover {
     }
 
     public void update(float deltaTime, OrthographicCamera camera) {
-        velocity.add(acceleration.cpy().scl(deltaTime));
-        position.add(velocity.cpy().scl(deltaTime));
-        this.checkBounds(camera);
+        this.update(deltaTime, camera, false);
     }
 
-    private void checkBounds(OrthographicCamera camera) {
+    public void update(float deltaTime, OrthographicCamera camera, boolean expandBounds) {
+        velocity.add(acceleration.cpy().scl(deltaTime));
+        position.add(velocity.cpy().scl(deltaTime));
+        if (expandBounds) {
+            this.expandBounds(camera);
+        }
+        else {
+            this.bounceBounds(camera);
+        }
+    }
+
+    private void bounceBounds(OrthographicCamera camera) {
         float width = camera.viewportWidth;
         float height = camera.viewportHeight;
-//
-//        if (position.x < -1f * width / 2f || position.x > width / 2f
-//                || position.y < -1f * height / 2f || position.y > height / 2f) {
-//            camera.viewportWidth *= 2;
-//            camera.viewportHeight *= 2;
-//            camera.update();
-//        }
 
         if (position.x < -1f * width / 2f || position.x > width / 2f) {
-            velocity = new Vector2(-1f * velocity.x, velocity.y);
+            velocity.scl(-1f, 1);
         }
         if (position.y < -1f * height / 2f || position.y > height / 2f) {
-            velocity = new Vector2(velocity.x, -1f * velocity.y);
+            velocity.scl(1, -1);
         }
+    }
+
+    private void expandBounds(OrthographicCamera camera) {
+        float width = camera.viewportWidth;
+        float height = camera.viewportHeight;
+        float aspectRatio = height / width;
+
+        if (position.x < -1f * width / 2f || position.x > width / 2f) {
+            float offset = Math.abs(position.x - width / 2f);
+            camera.viewportWidth += offset * 2;
+            camera.viewportHeight = camera.viewportWidth * aspectRatio;
+            camera.update();
+        }
+        if (position.y < -1f * height / 2f || position.y > height / 2f) {
+            float offset = Math.abs(position.y - height / 2f);
+            camera.viewportHeight += offset * 2;
+            camera.viewportWidth = camera.viewportHeight / aspectRatio;
+            camera.update();
+        }
+    }
+
+    public void applyForce(Vector2 force) {
+        acceleration.add(force);
     }
 
     public Vector2 getPosition() {

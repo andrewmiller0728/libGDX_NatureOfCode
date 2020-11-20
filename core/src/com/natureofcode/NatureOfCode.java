@@ -13,7 +13,8 @@ import java.util.Random;
 
 public class NatureOfCode extends ApplicationAdapter {
 
-	private int width, height;
+	private int windowWidth, windowHeight;
+	private float aspectRatio, viewWidth, viewHeight;
 	private OrthographicCamera camera;
 	private ShapeRenderer shapeRenderer;
 	private ArrayList<Mover> chasers;
@@ -21,15 +22,18 @@ public class NatureOfCode extends ApplicationAdapter {
 	
 	@Override
 	public void create () {
-		width = Gdx.graphics.getWidth();
-		height = Gdx.graphics.getHeight();
-		camera = new OrthographicCamera(1200, 800);
+		windowWidth = Gdx.graphics.getWidth();
+		windowHeight = Gdx.graphics.getHeight();
+		aspectRatio = (float) windowHeight / (float) windowWidth;
+		viewWidth = 1800;
+		viewHeight = viewWidth * aspectRatio;
+		camera = new OrthographicCamera(viewWidth, viewHeight);
 		shapeRenderer = new ShapeRenderer();
 
 		chasers = new ArrayList<>();
 		Random rand = new Random();
 		for (int i = 0; i < 20; i++) {
-			float initSize = (rand.nextFloat() * 40) + 10;
+			float initSize = (rand.nextFloat() * 40) + 20;
 			Vector2 initPos = new Vector2((rand.nextFloat() * camera.viewportWidth) - camera.viewportWidth / 2f,
 					(rand.nextFloat() * camera.viewportHeight) - camera.viewportHeight / 2f);
 			chasers.add(new Mover(initSize, initPos));
@@ -39,19 +43,19 @@ public class NatureOfCode extends ApplicationAdapter {
 
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
+		Gdx.gl.glClearColor(0f, 0.4f, 0.2f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		shapeRenderer.setProjectionMatrix(camera.combined);
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 		for (Mover chaser : chasers) {
 			float mouseX = MathUtils.map(0,
-					width,
+					windowWidth,
 					-1 * camera.viewportWidth / 2f,
 					camera.viewportWidth / 2f,
 					Gdx.input.getX());
 			float mouseY = MathUtils.map(0,
-					height,
+					windowHeight,
 					camera.viewportHeight / 2f,
 					-1f * camera.viewportHeight / 2f,
 					Gdx.input.getY());
@@ -59,11 +63,11 @@ public class NatureOfCode extends ApplicationAdapter {
 			Vector2 dir = mousePosition.sub(chaser.getPosition()).nor().scl(accelForce);
 			chaser.setAcceleration(dir);
 			chaser.update(Gdx.graphics.getDeltaTime(), camera);
-			shapeRenderer.setColor(0.5f, 0.8f, 0.5f, 1f);
+			shapeRenderer.setColor(0.7f, 0.7f, 0.8f, 1f);
 			shapeRenderer.circle(chaser.getPosition().x,
 					chaser.getPosition().y,
 					chaser.getSize());
-			shapeRenderer.setColor(0.1f, 0.1f, 0.8f, 1f);
+			shapeRenderer.setColor(0.4f, 0.8f, 0.6f, 1f);
 			shapeRenderer.circle(chaser.getPosition().x,
 					chaser.getPosition().y,
 					chaser.getSize() * 0.9f);
