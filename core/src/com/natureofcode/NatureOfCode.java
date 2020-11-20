@@ -18,7 +18,6 @@ public class NatureOfCode extends ApplicationAdapter {
 	private OrthographicCamera camera;
 	private ShapeRenderer shapeRenderer;
 	private ArrayList<Mover> balls;
-	private Vector2 gravity;
 	
 	@Override
 	public void create () {
@@ -33,13 +32,15 @@ public class NatureOfCode extends ApplicationAdapter {
 		balls = new ArrayList<>();
 		Random rand = new Random();
 		for (int i = 0; i < 20; i++) {
-			float initSize = (rand.nextFloat() * 40f) + 20f;
+			float initMass = (rand.nextFloat() * 8f) + 2f;
 			Vector2 initPos = new Vector2((rand.nextFloat() * camera.viewportWidth) - camera.viewportWidth / 2f,
-					(rand.nextFloat() * camera.viewportHeight) - camera.viewportHeight / 2f);
-			balls.add(new Mover(initSize, initPos, new Vector2(MathUtils.random(500f) - 250f, 0)));
+					(rand.nextFloat() * camera.viewportHeight) - camera.viewportHeight / 2f
+			);
+			balls.add(new Mover(initMass,
+					initPos,
+					new Vector2(0, 0)
+			));
 		}
-
-		gravity = new Vector2(0f, -10f);
 	}
 
 	@Override
@@ -50,7 +51,8 @@ public class NatureOfCode extends ApplicationAdapter {
 		shapeRenderer.setProjectionMatrix(camera.combined);
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 		for (Mover ball : balls) {
-			ball.applyForce(gravity);
+			ball.applyGravity(1000f);
+			ball.applyFriction(2000f); // TODO: This value should be in the range [0, 1)
 			ball.update(Gdx.graphics.getDeltaTime(), camera);
 			drawMover(shapeRenderer, ball);
 		}
@@ -66,11 +68,13 @@ public class NatureOfCode extends ApplicationAdapter {
 		shapeRenderer.setColor(0.7f, 0.7f, 0.8f, 1f);
 		shapeRenderer.circle(mover.getPosition().x,
 				mover.getPosition().y,
-				mover.getSize());
+				mover.getMass() * 8f
+		);
 		shapeRenderer.setColor(0.4f, 0.8f, 0.6f, 1f);
 		shapeRenderer.circle(mover.getPosition().x,
 				mover.getPosition().y,
-				mover.getSize() * 0.9f);
+				mover.getMass() * 8f * 0.9f
+		);
 	}
 
 	private Vector2 getMouseVector() {

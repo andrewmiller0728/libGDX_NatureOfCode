@@ -1,34 +1,32 @@
 package com.natureofcode;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 public class Mover {
 
     private Vector2 position, velocity, acceleration;
-    private float size, mass;
+    private float mass;
 
-    public Mover(float size, Vector2 initPos) {
+    public Mover(float mass, Vector2 initPos) {
         this.position = initPos;
         this.velocity = new Vector2();
         this.acceleration = new Vector2();
-        this.size = size;
-        this.mass = size / 2;
+        this.mass = mass;
     }
 
-    public Mover(float size, Vector2 initPos, Vector2 initVel) {
+    public Mover(float mass, Vector2 initPos, Vector2 initVel) {
         this.position = initPos;
         this.velocity = initVel;
         this.acceleration = new Vector2();
-        this.size = size;
+        this.mass = mass;
     }
 
-    public Mover(float size, Vector2 initPos, Vector2 initVel, Vector2 initAccel) {
+    public Mover(float mass, Vector2 initPos, Vector2 initVel, Vector2 initAccel) {
         this.position = initPos;
         this.velocity = initVel;
         this.acceleration = initAccel;
-        this.size = size;
+        this.mass = mass;
     }
 
     public void update(float deltaTime, OrthographicCamera camera) {
@@ -44,28 +42,29 @@ public class Mover {
         else {
             this.bounceBounds(camera);
         }
+        acceleration = Vector2.Zero.cpy();
     }
 
     private void bounceBounds(OrthographicCamera camera) {
         float width = camera.viewportWidth;
         float height = camera.viewportHeight;
 
-        if (position.x - size < -1f * width / 2f) {
+        if (position.x < -1f * width / 2f) {
             velocity.scl(-1f, 1);
-            position.x = -1f * width / 2f + size;
+            position.x = -1f * width / 2f;
         }
-        else if (position.x + size > width / 2f) {
+        else if (position.x > width / 2f) {
             velocity.scl(-1f, 1);
-            position.x = width / 2f - size;
+            position.x = width / 2f;
         }
 
-        if (position.y - size < -1f * height / 2f) {
+        if (position.y < -1f * height / 2f) {
             velocity.scl(1, -1);
-            position.y = -1f * height / 2f + size;
+            position.y = -1f * height / 2f;
         }
-        else if (position.y + size > height / 2f) {
+        else if (position.y > height / 2f) {
             velocity.scl(1, -1);
-            position.y = height / 2f - size;
+            position.y = height / 2f;
         }
     }
 
@@ -89,7 +88,16 @@ public class Mover {
     }
 
     public void applyForce(Vector2 force) {
-        acceleration.add(force);
+        acceleration.add(force.cpy().scl(1f / mass));
+    }
+
+    public void applyGravity(float mag) {
+        acceleration.add(Vector2.Y.cpy().scl(-1f * mag));
+    }
+
+    public void applyFriction(float cof) {
+        Vector2 friction = velocity.cpy().scl(-1f).nor().scl(cof);
+        this.applyForce(friction); // TODO: Multiply by the normal force
     }
 
     public Vector2 getPosition() {
@@ -116,7 +124,7 @@ public class Mover {
         this.acceleration = acceleration;
     }
 
-    public float getSize() {
-        return size;
+    public float getMass() {
+        return mass;
     }
 }
