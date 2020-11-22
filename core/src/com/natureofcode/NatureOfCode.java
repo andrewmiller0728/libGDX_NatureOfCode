@@ -18,13 +18,14 @@ public class NatureOfCode extends ApplicationAdapter {
 	private OrthographicCamera camera;
 	private ShapeRenderer shapeRenderer;
 	private ArrayList<Mover> balls;
+	private Liquid water;
 	
 	@Override
 	public void create () {
 		windowWidth = Gdx.graphics.getWidth();
 		windowHeight = Gdx.graphics.getHeight();
 		aspectRatio = (float) windowHeight / (float) windowWidth;
-		viewWidth = 1800;
+		viewWidth = 450;
 		viewHeight = viewWidth * aspectRatio;
 		camera = new OrthographicCamera(viewWidth, viewHeight);
 		shapeRenderer = new ShapeRenderer();
@@ -34,13 +35,21 @@ public class NatureOfCode extends ApplicationAdapter {
 		for (int i = 0; i < 20; i++) {
 			float initMass = (rand.nextFloat() * 8f) + 2f;
 			Vector2 initPos = new Vector2((rand.nextFloat() * camera.viewportWidth) - camera.viewportWidth / 2f,
-					(rand.nextFloat() * camera.viewportHeight) - camera.viewportHeight / 2f
+					(rand.nextFloat() * camera.viewportHeight / 2f)
 			);
-			balls.add(new Mover(initMass,
-					initPos,
-					new Vector2(0, 0)
-			));
+			balls.add(new Mover(initMass, initPos, new Vector2(0, 0)));
 		}
+
+		water = new Liquid(
+				new Vector2(
+						-1f * camera.viewportWidth / 2f,
+						-1f * camera.viewportHeight / 2f),
+				new Vector2(
+						camera.viewportWidth,
+						camera.viewportHeight / 3f),
+				1f,
+				0.5f
+		);
 	}
 
 	@Override
@@ -50,9 +59,12 @@ public class NatureOfCode extends ApplicationAdapter {
 
 		shapeRenderer.setProjectionMatrix(camera.combined);
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+		drawLiquid(shapeRenderer, water);
 		for (Mover ball : balls) {
-			ball.applyGravity(1000f);
-			ball.applyFriction(2000f); // TODO: This value should be in the range [0, 1)
+			ball.applyGravity(30f);
+			if (ball.isInside(water)) {
+				ball.applyDrag(water);
+			}
 			ball.update(Gdx.graphics.getDeltaTime(), camera);
 			drawMover(shapeRenderer, ball);
 		}
@@ -68,12 +80,22 @@ public class NatureOfCode extends ApplicationAdapter {
 		shapeRenderer.setColor(0.7f, 0.7f, 0.8f, 1f);
 		shapeRenderer.circle(mover.getPosition().x,
 				mover.getPosition().y,
-				mover.getMass() * 8f
+				mover.getMass() * 2f
 		);
 		shapeRenderer.setColor(0.4f, 0.8f, 0.6f, 1f);
 		shapeRenderer.circle(mover.getPosition().x,
 				mover.getPosition().y,
-				mover.getMass() * 8f * 0.9f
+				mover.getMass() * 2f * 0.9f
+		);
+	}
+
+	private void drawLiquid(ShapeRenderer shapeRenderer, Liquid liquid) {
+		shapeRenderer.setColor(0.3f, 0.3f, 1f, 0.5f);
+		shapeRenderer.rect(
+				liquid.getPosition().x,
+				liquid.getPosition().y,
+				liquid.getSize().x,
+				liquid.getSize().y
 		);
 	}
 

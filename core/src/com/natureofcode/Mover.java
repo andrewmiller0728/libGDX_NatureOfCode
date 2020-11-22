@@ -96,8 +96,25 @@ public class Mover {
     }
 
     public void applyFriction(float cof) {
-        Vector2 friction = velocity.cpy().scl(-1f).nor().scl(cof);
-        this.applyForce(friction); // TODO: Multiply by the normal force
+        float normal = acceleration.len();
+        Vector2 friction = velocity.cpy().scl(-1f).nor().scl(cof * normal);
+        this.applyForce(friction);
+    }
+
+    public void applyDrag(Liquid liquid) {
+        float coefficient = (-0.5f)
+                * liquid.getDensity()
+                * velocity.cpy().len2()
+                * liquid.getCod();
+        Vector2 normalVelocity = velocity.cpy().nor();
+        this.applyForce(normalVelocity.scl(coefficient));
+    }
+
+    public boolean isInside(Liquid liquid) {
+        return this.position.x > liquid.getPosition().x
+                && this.getPosition().x < liquid.getPosition().x + liquid.getSize().x
+                && this.getPosition().y > liquid.getPosition().y
+                && this.getPosition().y < liquid.getPosition().y + liquid.getSize().y;
     }
 
     public Vector2 getPosition() {
